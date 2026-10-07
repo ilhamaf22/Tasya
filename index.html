@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Untuk Kamu, Sayang</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..800,100;1,9..144,400..800,100&family=Ms+Madi&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="hearts" aria-hidden="true"></canvas>
+
+<main class="wrap">
+
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <div class="eyebrow">Hari ini, khusus buat kamu</div>
+    <div class="hi">Selamat ulang tahun,</div>
+    <div class="name" data-fill="nama">Nama</div>
+    <div class="big">Semoga hari ini <em>semanis</em> kamu.</div>
+    <div class="date-sticker"><span aria-hidden="true">♡</span><span data-fill="tanggalLahir">-</span><span aria-hidden="true">♡</span></div>
+    <div class="hero-actions">
+      <button class="btn" id="confettiBtn">Tiup terompet 🎉</button>
+      <a class="btn soft" href="#surat" style="text-decoration:none">Baca suratku</a>
+    </div>
+  </section>
+
+  <!-- LETTER -->
+  <section id="surat">
+    <article class="letter">
+      <div class="tape l"></div><div class="tape r"></div>
+      <div class="to">Untuk <span data-fill="panggilan">kamu</span>,</div>
+      <div id="letterBody"></div>
+      <p class="sign">— <span data-fill="dariSiapa">aku</span></p>
+    </article>
+  </section>
+
+  <!-- 4 SURPRISES -->
+  <section>
+    <div class="sec-head">
+      <div class="eyebrow">Pilih kejutanmu</div>
+      <h2>Ada empat hadiah kecil di sini</h2>
+      <p>Buka satu per satu. Pelan-pelan aja, semuanya punya kamu.</p>
+    </div>
+    <div class="stickers">
+      <button class="sticker" data-open="dlgStory">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#c2185b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6.5A2.5 2.5 0 0 0 4 21.5"/><path d="M12 13.5s-3-1.9-3-3.9A1.6 1.6 0 0 1 12 8.6a1.6 1.6 0 0 1 3 1c0 2-3 3.9-3 3.9z" fill="#f26b9b"/></svg></div>
+        <h3>Kisah Kita</h3><span>Dari pertama ketemu sampai hari ini.</span><span class="go">Buka cerita →</span>
+      </button>
+      <button class="sticker" data-open="dlgGallery">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#c2185b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="15" rx="2"/><circle cx="12" cy="12.5" r="3.5" fill="#f26b9b"/><path d="M8 5l1.5-2h5L16 5"/></svg></div>
+        <h3>Galeri Foto</h3><span>Momen-momen yang pengen aku simpan selamanya.</span><span class="go">Lihat foto →</span>
+      </button>
+      <button class="sticker" data-open="dlgWish">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#c2185b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.1 6.6.8-4.9 4.6 1.3 6.5L12 16.8 6.1 20l1.3-6.5L2.5 8.9l6.6-.8z" fill="#f26b9b"/></svg></div>
+        <h3>Make a Wish</h3><span>Tiup lilinnya, terus lihat doaku buat kamu.</span><span class="go">Tiup lilin →</span>
+      </button>
+      <button class="sticker" data-open="dlgLove">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="#f26b9b" stroke="#c2185b" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7.5-4.6-9.5-9.3C1.1 8.3 3.3 4.5 7 4.5c2.1 0 3.6 1.2 5 3 1.4-1.8 2.9-3 5-3 3.7 0 5.9 3.8 4.5 7.2C19.5 16.4 12 21 12 21z"/></svg></div>
+        <h3>Sayangnya Aku</h3><span>Coba ukur seberapa besar. Spoiler: nggak muat.</span><span class="go">Ukur sekarang →</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- TOGETHER COUNTER -->
+  <section>
+    <div class="sec-head">
+      <div class="eyebrow">Sejak <span data-fill="tanggalJadian">-</span></div>
+      <h2>Kita sudah bersama selama</h2>
+    </div>
+    <div class="counter" aria-live="off">
+      <div class="cell"><b id="cDays">0</b><small>Hari</small></div>
+      <div class="cell"><b id="cHours">0</b><small>Jam</small></div>
+      <div class="cell"><b id="cMins">0</b><small>Menit</small></div>
+      <div class="cell"><b id="cSecs">0</b><small>Detik</small></div>
+    </div>
+  </section>
+
+  <!-- REASONS -->
+  <section>
+    <div class="sec-head">
+      <div class="eyebrow">Toples alasan</div>
+      <h2>Kenapa aku sayang kamu</h2>
+      <p>Ambil satu alasan setiap kali kamu ragu. Stoknya nggak akan habis.</p>
+    </div>
+    <div class="reason-card" id="reasonCard">
+      <div class="num" id="reasonNum">Alasan #1</div>
+      <p id="reasonText"></p>
+    </div>
+    <div class="center"><button class="btn" id="reasonBtn">Ambil alasan lain</button></div>
+  </section>
+
+  <!-- OPEN WHEN -->
+  <section>
+    <div class="sec-head">
+      <div class="eyebrow">Surat-surat kecil</div>
+      <h2>Buka saat kamu…</h2>
+      <p>Simpan buat nanti. Tiap amplop punya waktunya sendiri.</p>
+    </div>
+    <div class="envelopes" id="envelopes"></div>
+  </section>
+
+  <footer>
+    <div class="script">Happy birthday, <span data-fill="panggilan">sayang</span></div>
+    <div>Dibuat dengan sepenuh hati oleh <span data-fill="dariSiapa">aku</span>, khusus buat kamu.</div>
+    <a href="#top" class="btn soft" style="text-decoration:none;margin-top:10px">Kembali ke atas</a>
+  </footer>
+</main>
+
+<!-- MUSIC PLAYER -->
+<div class="player" id="player">
+  <button class="disc" id="playBtn" aria-label="Putar lagu">
+    <svg id="playIco" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+  </button>
+  <div class="track">
+    <b id="trackTitle">Shape of My Heart</b>
+    <small id="trackSub">Backstreet Boys</small>
+  </div>
+  <div class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <audio id="song" loop preload="none"></audio>
+</div>
+
+<!-- DIALOGS -->
+<dialog id="dlgStory">
+  <div class="dlg-head"><h2>Kisah Kita</h2><button class="x" data-close aria-label="Tutup">×</button></div>
+  <div class="dlg-body"><ol class="timeline" id="timeline"></ol></div>
+</dialog>
+
+<dialog id="dlgGallery">
+  <div class="dlg-head"><h2 id="galTitle">Galeri Foto</h2><button class="x" data-close aria-label="Tutup">×</button></div>
+  <div class="dlg-body">
+    <div class="gallery" id="gallery"></div>
+    <div class="lightbox" id="lightbox" hidden>
+      <div class="ph" id="lbPh"></div>
+      <div class="cap" id="lbCap"></div>
+      <div class="center"><button class="btn soft" id="lbPrev">← Sebelumnya</button><button class="btn soft" id="lbBack">Semua foto</button><button class="btn soft" id="lbNext">Berikutnya →</button></div>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="dlgWish">
+  <div class="dlg-head"><h2>Make a Wish</h2><button class="x" data-close aria-label="Tutup">×</button></div>
+  <div class="dlg-body">
+    <div class="cake-zone">
+      <p id="wishPrompt" style="margin:0;color:var(--muted)">Pejamkan mata, ucapkan keinginanmu dalam hati, lalu ketuk lilinnya satu per satu.</p>
+      <div class="cake">
+        <div class="candles" id="candles"></div>
+        <div class="tier t2"></div><div class="tier t1"></div><div class="plate"></div>
+      </div>
+      <button class="btn soft" id="blowAll">Tiup semuanya sekaligus</button>
+      <div id="wishResult" hidden style="width:100%;display:flex;flex-direction:column;align-items:center;gap:14px">
+        <h3 style="font-size:26px;color:var(--berry)">Ini doa-doaku buat kamu</h3>
+        <ul class="wish-list" id="wishList"></ul>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="dlgLove">
+  <div class="dlg-head"><h2>Seberapa sayang aku?</h2><button class="x" data-close aria-label="Tutup">×</button></div>
+  <div class="dlg-body">
+    <div class="love">
+      <p style="margin:0;color:var(--muted)">Tekan dan tahan hatinya.</p>
+      <button class="heart-btn" id="heartBtn" aria-label="Tekan dan tahan untuk mengukur">
+        <svg viewBox="0 0 24 22"><path d="M12 21s-7.5-4.6-9.5-9.3C1.1 8.3 3.3 4.5 7 4.5c2.1 0 3.6 1.2 5 3 1.4-1.8 2.9-3 5-3 3.7 0 5.9 3.8 4.5 7.2C19.5 16.4 12 21 12 21z" fill="#c2185b"/></svg>
+      </button>
+      <div class="meter"><i id="meterFill"></i></div>
+      <div class="scale"><span>Sedikit</span><span>Banyak</span><span>Banget</span><span>∞</span></div>
+      <div class="meter-label" id="meterLabel">0%</div>
+      <div id="loveFinal" hidden style="display:flex;flex-direction:column;gap:10px;align-items:center">
+        <div class="love-final">Melebihi semua skala.</div>
+        <p style="margin:0;max-width:46ch" data-fill="pesanSayang"></p>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="dlgNote">
+  <div class="dlg-head"><h2 id="noteTitle">Buka saat…</h2><button class="x" data-close aria-label="Tutup">×</button></div>
+  <div class="dlg-body"><div class="note" id="noteBody"></div></div>
+</dialog>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>

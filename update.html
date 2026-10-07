@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Admin Kado Ulang Tahun</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,400..800,100;1,9..144,400..800,100&family=Ms+Madi&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+<meta name="robots" content="noindex">
+</head>
+<body>
+<div class="adm">
+  <div class="adm-top">
+    <div><div class="eyebrow">Halaman pengaturan</div><h1>Ubah isi kado ulang tahun</h1>
+    <p>Perubahan baru terlihat oleh dia setelah kamu menekan <b>Simpan</b>.</p></div>
+    <button type="button" class="mini" id="logoutBtn" hidden>Keluar</button>
+  </div>
+
+  <form class="panel gate" id="loginView" hidden>
+    <h2 style="justify-content:center">Masuk sebagai admin</h2>
+    <label class="field" style="text-align:left"><span>Email</span><input id="email" type="email" autocomplete="username" required></label>
+    <label class="field" style="text-align:left"><span>Kata sandi</span><input id="password" type="password" autocomplete="current-password" required></label>
+    <p id="loginErr" class="status err" style="margin:0" role="alert"></p>
+    <button class="btn" id="loginBtn" type="submit">Masuk</button>
+  </form>
+
+  <div class="panel gate" id="msgView">
+    <h2 id="msgTitle" style="justify-content:center">Memuat…</h2>
+    <p id="msgText" style="margin:0;color:var(--muted)">Sebentar.</p>
+  </div>
+
+  <div id="adminForm" hidden style="display:flex;flex-direction:column;gap:22px"></div>
+</div>
+
+<div class="savebar" id="savebar" hidden>
+  <div class="savebar-in">
+    <span class="status" id="saveStatus"></span>
+    <div class="center">
+      <a href="/" target="_blank" class="btn soft" style="text-decoration:none">Lihat halaman</a>
+      <button type="button" class="btn" id="saveBtn">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="admin.js"></script>
+</body>
+</html>
