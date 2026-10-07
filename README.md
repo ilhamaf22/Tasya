@@ -5,13 +5,13 @@ Isi folder:
 | File | Fungsi |
 |---|---|
 | `index.html`, `main.js`, `style.css` | Halaman ulang tahun untuk dia |
-| `update.html`, `admin.js` | Halaman admin, terbuka di `/update` (pakai login) |
+| `update.html`, `admin.js` | Halaman admin, terbuka di `/update` (pakai PIN) |
 | `data.js` | Isi cadangan dan koneksi ke Firestore |
-| `firebase-config.js` | **Wajib diisi**: konfigurasi Firebase dan email admin |
+| `firebase-config.js` | Konfigurasi Firebase (sudah diisi) |
 | `firestore.rules` | Aturan keamanan database |
 | `vercel.json` | Supaya `/update` bisa dibuka tanpa `.html` |
 
-Semua gratis: Firebase paket **Spark** (Firestore + Authentication) dan Vercel paket **Hobby**.
+Semua gratis: Firebase paket **Spark** (Firestore saja) dan Vercel paket **Hobby**.
 Foto disimpan langsung di Firestore (sudah diperkecil otomatis), jadi tidak perlu Firebase Storage,
 yang sekarang mewajibkan paket berbayar Blaze.
 
@@ -27,16 +27,19 @@ yang sekarang mewajibkan paket berbayar Blaze.
 
 1. Menu **Build → Firestore Database → Create database**.
 2. Pilih lokasi terdekat, misalnya `asia-southeast2 (Jakarta)`, lalu mode **production**.
-3. Buka tab **Rules**, hapus isinya, tempel isi file `firestore.rules`.
-4. Ganti `emailkamu@gmail.com` dengan email admin-mu, lalu klik **Publish**.
+3. Buka tab **Rules**, hapus isinya, tempel isi file `firestore.rules`, lalu klik **Publish**.
 
-## 3. Buat akun admin
+## 3. Buat PIN admin
 
-1. Menu **Build → Authentication → Get started**.
-2. Tab **Sign-in method** → aktifkan **Email/Password**.
-3. Tab **Users** → **Add user** → isi email dan kata sandi untuk login admin.
-4. Isi email yang sama di `ADMIN_EMAIL` pada `firebase-config.js`.
-   Email di `firestore.rules` dan di `firebase-config.js` harus sama persis.
+PIN tidak disimpan di kode, tapi di Firestore, di dokumen yang tidak bisa dibaca dari website.
+
+1. Di **Firestore Database → Data**, klik **+ Start collection**.
+2. Collection ID: `admin` → Next.
+3. Document ID: `secret`.
+4. Tambahkan field: nama `pin`, tipe **string**, value PIN pilihanmu (misalnya `250314`).
+5. Klik **Save**.
+
+Pakai minimal 6 digit supaya tidak mudah ditebak. Untuk mengganti PIN, ubah value di dokumen itu.
 
 ## 4. Tambahkan lagu
 
@@ -62,14 +65,9 @@ vercel          # deploy pertama, ikuti pertanyaannya
 vercel --prod   # terbitkan ke domain utama
 ```
 
-## 6. Izinkan domain Vercel di Firebase
+## 6. Isi kontennya
 
-**Authentication → Settings → Authorized domains → Add domain**, isi domain Vercel-mu,
-misalnya `kado-ultah.vercel.app`.
-
-## 7. Isi kontennya
-
-1. Buka `https://domainmu.vercel.app/update` lalu login dengan akun admin.
+1. Buka `https://domainmu.vercel.app/update` lalu masukkan PIN.
 2. Isi nama, surat, foto, doa, dan lainnya.
 3. Klik **Simpan**. Halaman utama langsung menampilkan isi baru saat dibuka atau di-refresh.
 
@@ -84,7 +82,11 @@ misalnya `kado-ultah.vercel.app`.
 ## Kalau ada masalah
 
 - **"Firebase belum diatur"** di `/update`: `firebase-config.js` masih berisi `ISI_...`.
-- **"Ditolak Firestore"** saat menyimpan: rules belum di-publish, atau email di rules,
-  `ADMIN_EMAIL`, dan email login tidak sama persis.
+- **"PIN salah"** padahal sudah benar: rules terbaru belum di-Publish, dokumen `admin/secret`
+  belum dibuat, atau field `pin` bertipe number (harus **string**).
+- **"Ditolak Firestore"** saat menyimpan: rules belum di-Publish, atau PIN diganti di Firestore
+  saat halaman admin masih terbuka. Klik **Keluar**, lalu masukkan PIN lagi.
 - **Halaman utama masih menampilkan isi contoh**: belum pernah menekan Simpan di `/update`,
   atau buka Console browser (F12) untuk melihat pesan errornya.
+- Foto yang dihapus dari galeri tetap tersimpan di Firestore (tidak tampil lagi). Ini tidak masalah
+  untuk kuota gratis; kalau mau bersih, hapus manual di koleksi `photos`.

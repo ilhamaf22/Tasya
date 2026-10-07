@@ -1,27 +1,40 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Ganti dengan email akun admin yang sama dengan ADMIN_EMAIL di firebase-config.js
-    function isAdmin() {
-      return request.auth != null
-        && request.auth.token.email == "emailkamu@gmail.com";
+
+    // PIN admin disimpan di dokumen admin/secret (field "pin", tipe string).
+    function secretPin() {
+      return get(/databases/$(database)/documents/admin/secret).data.pin;
     }
 
-    // Isi halaman: siapa pun boleh membaca, hanya admin yang boleh mengubah
+    // Tiket harus baru dibuat di penyimpanan yang sama, supaya tiket lama tidak bisa dipakai ulang.
+    function freshTicket(id) {
+      return id is string
+        && !exists(/databases/$(database)/documents/tickets/$(id))
+        && existsAfter(/databases/$(database)/documents/tickets/$(id));
+    }
+
+    // Tempat PIN: tidak bisa dibaca atau diubah dari website
+    match /admin/{docId} {
+      allow read, write: if false;
+    }
+
+    // Tiket hanya bisa dibuat kalau PIN-nya benar, dan tidak bisa dibaca
+    match /tickets/{ticketId} {
+      allow read, update, delete: if false;
+      allow create: if request.resource.data.pin == secretPin();
+    }
+
+    // Isi halaman: semua boleh membaca, menulis butuh tiket ber-PIN benar
     match /site/{docId} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow create, update: if freshTicket(request.resource.data.ticket);
     }
 
-    // Foto galeri (disimpan sebagai data URL, maksimal ~1 MB per dokumen)
+    // Foto galeri
     match /photos/{photoId} {
       allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    // Selain itu, tutup semuanya
-    match /{document=**} {
-      allow read, write: if false;
+      allow create, update: if freshTicket(request.resource.data.ticket);
     }
   }
 }

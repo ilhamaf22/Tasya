@@ -1,7 +1,5 @@
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
-import { DEFAULTS, esc, clone, merge, app, db, configured, loadContent, loadPhoto } from "./data.js";
-import { ADMIN_EMAIL } from "./firebase-config.js";
+import { doc, setDoc, writeBatch } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { DEFAULTS, esc, clone, merge, db, configured, loadContent, loadPhoto } from "./data.js";
 
 const $ = s => document.querySelector(s);
 let saved = clone(DEFAULTS);    // isi terakhir yang tersimpan di Firestore
@@ -9,6 +7,7 @@ let D = clone(DEFAULTS);        // salinan yang sedang diedit
 const photoData = {};           // id foto -> data URL (yang tersimpan + yang baru diunggah)
 let newPhotos = new Set();      // id foto yang belum tersimpan
 let dirty = false, saving = false;
+let PIN = "";
 
 function setStatus(t, cls = ""){ const s = $("#saveStatus"); s.textContent = t; s.className = "status " + cls; }
 function showView(name){
@@ -20,41 +19,60 @@ function showView(name){
 }
 function message(title, text){ $("#msgTitle").textContent = title; $("#msgText").textContent = text; showView("msg"); }
 
-/* ---------- Login ---------- */
+/* ---------- PIN ----------
+   PIN tidak ada di kode. Ia disimpan di dokumen Firestore admin/secret yang tidak bisa dibaca siapa pun.
+   Setiap penyimpanan menyertakan "tiket" baru berisi PIN; rules hanya menerima tiket yang PIN-nya cocok. */
+const newId = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now() + "" + Math.random()).replace(/[^a-z0-9]/gi, "");
+async function writeWithTicket(ref, data){
+  const t = newId(), b = writeBatch(db);
+  b.set(doc(db, "tickets", t), { pin: PIN, at: Date.now() });
+  b.set(ref, { ...data, ticket: t });
+  await b.commit();
+}
+const pinStore = {
+  get(){ try { return sessionStorage.getItem("kado-pin") || ""; } catch { return ""; } },
+  set(v){ try { v ? sessionStorage.setItem("kado-pin", v) : sessionStorage.removeItem("kado-pin"); } catch {} }
+};
+
+async function tryPin(pin){
+  await setDoc(doc(db, "tickets", newId()), { pin, at: Date.now() });   // ditolak rules kalau PIN salah
+  PIN = pin; pinStore.set(pin);
+  message("Memuat isi…", "Sebentar, sedang mengambil isi halaman.");
+  try {
+    saved = merge(await loadContent()); delete saved.ticket;
+    await Promise.all(saved.galeri.map(g => g.photo).filter(Boolean).map(id => loadPhoto(id).then(d => { if (d) photoData[id] = d; })));
+  } catch (e) { console.warn(e); }
+  D = clone(saved); renderAdmin(); showView("form");
+  setStatus("Semua perubahan sudah tersimpan.");
+}
+
 if (!configured) {
   message("Firebase belum diatur", "Isi dulu file firebase-config.js dengan konfigurasi proyek Firebase-mu, lalu deploy ulang.");
 } else {
-  const auth = getAuth(app);
-  onAuthStateChanged(auth, async user => {
-    if (!user) { showView("login"); return; }
-    if (user.email !== ADMIN_EMAIL) { message("Akun ini bukan admin", "Kamu masuk sebagai " + user.email + ". Keluar lalu masuk dengan akun admin."); $("#logoutBtn").hidden = false; return; }
-    message("Memuat isi…", "Sebentar, sedang mengambil isi halaman.");
-    try {
-      saved = merge(await loadContent());
-      await Promise.all(saved.galeri.map(g => g.photo).filter(Boolean).map(id => loadPhoto(id).then(d => { if (d) photoData[id] = d; })));
-    } catch (e) { console.warn(e); }
-    D = clone(saved); renderAdmin(); showView("form");
-    setStatus("Semua perubahan sudah tersimpan.");
-  });
-  $("#loginForm").addEventListener("submit", async e => {
+  const remembered = pinStore.get();
+  if (remembered) tryPin(remembered).catch(() => { pinStore.set(""); showView("login"); });
+  else showView("login");
+
+  $("#loginView").addEventListener("submit", async e => {
     e.preventDefault();
+    const pin = $("#pin").value.trim();
+    if (!pin) return;
     $("#loginErr").textContent = ""; $("#loginBtn").disabled = true;
-    try { await signInWithEmailAndPassword(auth, $("#email").value.trim(), $("#password").value); }
+    try { await tryPin(pin); }
     catch (err) {
       const c = err?.code || "";
-      $("#loginErr").textContent = c.includes("invalid-credential") || c.includes("wrong-password") || c.includes("user-not-found")
-        ? "Email atau kata sandi salah."
-        : c.includes("too-many-requests") ? "Terlalu banyak percobaan. Tunggu beberapa menit lalu coba lagi."
-        : c.includes("operation-not-allowed") ? "Login Email/Password belum diaktifkan di Firebase (Authentication → Sign-in method)."
-        : c.includes("unauthorized-domain") ? "Domain ini belum diizinkan. Tambahkan di Authentication → Settings → Authorized domains."
-        : c.includes("api-key") ? "Konfigurasi Firebase di firebase-config.js tidak cocok dengan proyekmu."
-        : c.includes("network") ? "Tidak bisa terhubung ke Firebase. Periksa koneksimu."
-        : "Gagal masuk.";
-      $("#loginErr").textContent += c ? ` (kode: ${c})` : "";
-      console.error("Login gagal:", err);
+      $("#loginErr").textContent = c.includes("permission-denied")
+        ? "PIN salah."
+        : c.includes("unavailable") ? "Tidak bisa terhubung ke Firebase. Periksa koneksimu."
+        : "Gagal memeriksa PIN" + (c ? ` (kode: ${c})` : ".");
+      console.error("PIN gagal:", err);
+      $("#pin").select();
     } finally { $("#loginBtn").disabled = false; }
   });
-  $("#logoutBtn").onclick = () => { if (dirty && !confirm("Ada perubahan yang belum disimpan. Tetap keluar?")) return; dirty = false; signOut(auth); };
+  $("#logoutBtn").onclick = () => {
+    if (dirty && !confirm("Ada perubahan yang belum disimpan. Tetap keluar?")) return;
+    dirty = false; PIN = ""; pinStore.set(""); $("#pin").value = ""; showView("login");
+  };
 }
 
 /* ---------- Form ---------- */
@@ -195,27 +213,26 @@ $("#adminForm").addEventListener("change", async e => {
 });
 
 $("#saveBtn").onclick = async () => {
-  if (saving || !db) return;
+  if (saving || !db || !PIN) return;
   saving = true; $("#saveBtn").disabled = true;
   const now = new Set(D.galeri.map(g => g.photo).filter(Boolean));
-  const old = new Set(saved.galeri.map(g => g.photo).filter(Boolean));
   try {
     const toUpload = [...now].filter(id => newPhotos.has(id));
     for (let n = 0; n < toUpload.length; n++) {
       setStatus(`Mengunggah foto ${n+1} dari ${toUpload.length}…`);
-      await setDoc(doc(db, "photos", toUpload[n]), { data: photoData[toUpload[n]] });
+      await writeWithTicket(doc(db, "photos", toUpload[n]), { data: photoData[toUpload[n]] });
       newPhotos.delete(toUpload[n]);
     }
     setStatus("Menyimpan isi…");
-    await setDoc(doc(db, "site", "content"), clone(D));
-    for (const id of old) if (!now.has(id)) await deleteDoc(doc(db, "photos", id)).catch(() => {});
+    const content = clone(D); delete content.ticket;
+    await writeWithTicket(doc(db, "site", "content"), content);
     saved = clone(D); dirty = false;
     setStatus("Tersimpan. Dia akan melihat versi terbaru saat membuka halaman.");
   } catch (err) {
     const c = err?.code || "";
     setStatus(c.includes("permission-denied")
-      ? "Ditolak Firestore. Pastikan rules sudah dipasang dan ADMIN_EMAIL sama persis dengan email login."
-      : "Gagal menyimpan. Periksa koneksimu lalu coba lagi.", "err");
+      ? "Ditolak Firestore. Pastikan rules terbaru sudah di-Publish dan PIN di admin/secret tidak berubah."
+      : "Gagal menyimpan" + (c ? ` (kode: ${c})` : ". Periksa koneksimu lalu coba lagi."), "err");
   } finally { saving = false; $("#saveBtn").disabled = false; }
 };
 
