@@ -45,7 +45,13 @@ if (!configured) {
       $("#loginErr").textContent = c.includes("invalid-credential") || c.includes("wrong-password") || c.includes("user-not-found")
         ? "Email atau kata sandi salah."
         : c.includes("too-many-requests") ? "Terlalu banyak percobaan. Tunggu beberapa menit lalu coba lagi."
-        : "Gagal masuk. Periksa koneksimu lalu coba lagi.";
+        : c.includes("operation-not-allowed") ? "Login Email/Password belum diaktifkan di Firebase (Authentication → Sign-in method)."
+        : c.includes("unauthorized-domain") ? "Domain ini belum diizinkan. Tambahkan di Authentication → Settings → Authorized domains."
+        : c.includes("api-key") ? "Konfigurasi Firebase di firebase-config.js tidak cocok dengan proyekmu."
+        : c.includes("network") ? "Tidak bisa terhubung ke Firebase. Periksa koneksimu."
+        : "Gagal masuk.";
+      $("#loginErr").textContent += c ? ` (kode: ${c})` : "";
+      console.error("Login gagal:", err);
     } finally { $("#loginBtn").disabled = false; }
   });
   $("#logoutBtn").onclick = () => { if (dirty && !confirm("Ada perubahan yang belum disimpan. Tetap keluar?")) return; dirty = false; signOut(auth); };
